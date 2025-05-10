@@ -61,7 +61,11 @@ const NewAgentPlay = () => {
 		try {
 			const rawResp = await axios.post(`${API_CUSTOMA_AGENTS_BASE_URL}/agents/${agentInfo.fastId}/test-stream`);
 			const resp = rawResp.data;
-			const websocketUrl = resp?.websocket_url;
+			let websocketUrl = resp?.websocket_url;
+
+			if (window.location.protocol === "https:") {
+				websocketUrl = websocketUrl.replace("ws://", "wss://");
+			}
 
 			const ws = new WebSocket(websocketUrl);
 			websocketRef.current = ws;
@@ -264,7 +268,7 @@ const NewAgentPlay = () => {
 						key={index}
 						className={`border border-white/[9%] px-2.5 py-3 rounded-3xl flex gap-2 ${msg.role === "user" ? "bg-[#6A53E7]/20 justify-end" : msg.role === "agent" ? "bg-white/5" : "bg-red-500/20"}`}>
 						{msg.role !== "user" && <RiSparklingFill className="text-[#6A53E7]" />}
-						<div dangerouslySetInnerHTML={{__html: msg.content}} ref={msg.role === "agent" ? responseRef : null} className="text-sm">
+						<div dangerouslySetInnerHTML={{ __html: msg.content }} ref={msg.role === "agent" ? responseRef : null} className="text-sm">
 							{/* {msg.content} */}
 						</div>
 					</div>
