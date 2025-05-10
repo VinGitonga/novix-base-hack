@@ -63,9 +63,12 @@ const NewAgentPlay = () => {
 			const resp = rawResp.data;
 			let websocketUrl = resp?.websocket_url;
 
-			if (window.location.protocol === "https:") {
-				websocketUrl = websocketUrl.replace("ws://", "wss://");
-			}
+			console.log('websocketUrl',websocketUrl)
+			
+			
+			// websocketUrl = websocketUrl.replace("ws://", "wss://");
+			// websocketUrl = websocketUrl.replace("143.198.238.202", "novix-server.vingitonga.xyz")
+			console.log('websocketUrl2',websocketUrl)
 
 			const ws = new WebSocket(websocketUrl);
 			websocketRef.current = ws;
