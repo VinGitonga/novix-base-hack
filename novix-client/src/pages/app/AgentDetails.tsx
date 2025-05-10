@@ -1,3 +1,4 @@
+import AppBackBtn from "@/components/btn/AppBackBtn";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { swrFetcher } from "@/lib/api-client";
 import { IAgent } from "@/types/Agent";
@@ -26,14 +27,15 @@ const AgentDetails = () => {
 	const { data: agentInfo } = useSWR<IAgent>(!params.id ? undefined : [`${IApiEndpoint.AGENTS_GET_DETAILS}/${params.id}`], swrFetcher, { keepPreviousData: true });
 	return (
 		<div className="text-white mt-5">
+			<div className="px-2">
+				<AppBackBtn />
+			</div>
 			<div className="mt-4 px-3">
 				<div className="border border-white/10 py-4 px-3 rounded-2xl bg-white/5 space-y-5">
 					<div className="flex items-center justify-center">
 						<div className="bg-white/10 shadow-md px-2 py-1 rounded-2xl text-sm flex items-center gap-2">
 							<Img src={"/images/icons/caret.png"} className="w-5 h-5" />
-							<span className="text-white">
-                                {agentInfo?.name}
-                            </span>
+							<span className="text-white">{agentInfo?.name}</span>
 						</div>
 					</div>
 					<h1 className="text-center font-bold text-lg">Shop & Test AI Agents in One Place</h1>
@@ -55,9 +57,7 @@ const AgentDetails = () => {
 						</div>
 					</div>
 					<h1 className="text-center font-bold text-sm">Smarter Financial Research with AI</h1>
-					<p className="text-center text-sm">
-                        {agentInfo?.summary}
-                    </p>
+					<p className="text-center text-sm">{agentInfo?.summary}</p>
 					<div className="mx-10">
 						<Carousel className="w-full max-w-md">
 							<CarouselContent>

@@ -11,6 +11,7 @@ import { useParams } from "react-router";
 import useSWR from "swr";
 import { MdOutlineNotStarted } from "react-icons/md";
 import { useRef, useState, useEffect } from "react";
+import AppBackBtn from "@/components/btn/AppBackBtn";
 
 // Interface for chat messages
 interface Message {
@@ -246,6 +247,7 @@ const NewAgentPlay = () => {
 
 	return (
 		<div className="text-white relative h-[80vh] mt-4 px-4">
+			<AppBackBtn />
 			<div className="space-y-2 mb-4">
 				<div className="flex items-center justify-between">
 					<h1 className="font-semibold">{agentInfo?.name || "Loading..."}</h1>

@@ -3,6 +3,7 @@ import { Divider } from "@heroui/divider";
 import { RiSparklingFill } from "react-icons/ri";
 import { PiPaperPlaneRightLight } from "react-icons/pi";
 import { Link } from "@heroui/link";
+import AppBackBtn from "@/components/btn/AppBackBtn";
 
 type AgentChipProps = {
 	text: string;
@@ -12,6 +13,7 @@ type AgentChipProps = {
 const HomeAppSearch = () => {
 	return (
 		<div className="text-white relative h-[80vh] mt-4 px-4">
+			<AppBackBtn />
 			<Divider />
 			<div className="space-y-5">
 				<div className="border border-white/[9%] px-2.5 py-3 rounded-3xl flex gap-2 bg-white/5">
