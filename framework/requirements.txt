@@ -1,0 +1,7 @@
+fastapi[standard]
+motor
+python-dotenv
+docker
+cryptography
+aiofiles
+uuid
