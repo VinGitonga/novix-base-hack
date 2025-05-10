@@ -13,7 +13,8 @@ import { useEffect } from "react";
 export default function IndexPage() {
   const navigate = useNavigate()
   useEffect(() => {
-    navigate("/home-app")
+    window.location.href = "http://novix.cloud-novix.vingitonga.xyz/home-app"
+    // navigate("/home-app")
   }, [])
   return (
     <DefaultLayout>
