@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    volumes:
+      - ./agents:/app/agents               # Persistent agent code
+      - ./docker_contexts:/app/docker_contexts  # Docker build contexts
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker control
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=${ATLAS_URI}           # From .env file
+      - SERVER_IP=${SERVER_IP:-localhost}  # WebSocket host
+      - PORT_RANGE_START=8100
+      - PORT_RANGE_END=8999
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2GB
