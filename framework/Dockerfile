@@ -24,4 +24,4 @@ RUN mkdir -p agents docker_contexts
 
 EXPOSE 9000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9000"]

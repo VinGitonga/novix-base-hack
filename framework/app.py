@@ -273,6 +273,10 @@ async def stop_agent_container(agent_id: str, db: AsyncIOMotorDatabase):
         )
 
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
 @app.post("/api/agents/")
 async def create_agent(
     background_tasks: BackgroundTasks,
