@@ -40,7 +40,7 @@ const AgentDetails = () => {
 					<p className="text-center">Discover, try, and buy powerful AI agents built to solve real problems.</p>
 					<div className="flex items-center justify-center gap-5">
 						<Button className="rounded-4xl bg-linear-65 from-white from-5% to-[#0A0248] to-95%">Buy the Agent</Button>
-						<Link href={`/home-app/agent-play/${params.id}`} className="text-white underline underline-offset-4">
+						<Link href={`/home-app/new-agent-play/${params.id}`} className="text-white underline underline-offset-4">
 							Free Trial
 						</Link>
 					</div>
