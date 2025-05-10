@@ -8,7 +8,7 @@ services:
       - ./docker_contexts:/app/docker_contexts  # Docker build contexts
       - /var/run/docker.sock:/var/run/docker.sock  # Docker control
     ports:
-      - "8000:8000"
+      - "9000:9000"
     environment:
       - MONGODB_URL=${ATLAS_URI}           # From .env file
       - SERVER_IP=${SERVER_IP:-localhost}  # WebSocket host
