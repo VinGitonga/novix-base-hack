@@ -53,10 +53,13 @@ export class Agent {
 	agentType: string;
 
 	@Prop()
-	inputExample: string
+	inputExample: string;
 
 	@Prop()
-	outputExample: string
+	outputExample: string;
+
+	@Prop({ required: false, type: Object })
+	walletMetadata: Record<string, string>;
 }
 
 export const AgentSchema = SchemaFactory.createForClass(Agent);

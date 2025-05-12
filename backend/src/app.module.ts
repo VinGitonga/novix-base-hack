@@ -6,6 +6,8 @@ import configuration from "./config/configuration";
 import { MongooseModule } from "@nestjs/mongoose";
 import { AgentModule } from './agent/agent.module';
 import { UserModule } from './user/user.module';
+import { AgentSessionModule } from './agent-session/agent-session.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
 	imports: [
@@ -19,6 +21,8 @@ import { UserModule } from './user/user.module';
 		}),
 		AgentModule,
 		UserModule,
+		AgentSessionModule,
+		PaymentsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

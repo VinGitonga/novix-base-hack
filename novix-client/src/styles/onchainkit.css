@@ -1,28 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
-@import "tailwindcss";
-@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
-@plugin '../lib/hero.ts';
-
-@custom-variant dark (&:is(.dark *));
-@source inline("{dark:,}");
-
-@theme {
-	--font-nunito: "Nunito", sans-serif;
-}
-
-@layer base {
-	*,
-	::after,
-	::before,
-	::backdrop,
-	::file-selector-button {
-		border-color: var(--color-gray-200, currentcolor);
-	}
-}
-
 .onchainkit-wrapper {
+	@tailwind base;
+	@tailwind components;
 	@tailwind utilities;
 	@layer base {
+		:root,
 		.light,
 		.default-light {
 			--ock-font-family: "DM Sans", sans-serif;

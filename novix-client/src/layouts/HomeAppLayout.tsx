@@ -6,6 +6,7 @@ import { Outlet } from "react-router";
 import { FiHome } from "react-icons/fi";
 import { RiBookmark2Line, RiRobot2Fill } from "react-icons/ri";
 import { TbUser } from "react-icons/tb";
+import OnChainWalletConnect from "@/components/web3/OnChainWalletConnect";
 
 const HomeAppLayout = () => {
 	return (
@@ -24,6 +25,7 @@ const HomeAppLayout = () => {
 					</NavbarBrand>
 				</NavbarContent>
 				<NavbarContent className="basis-1/5 sm:basis-full" justify="end">
+					{/* <OnChainWalletConnect /> */}
 					<Button startContent={<Img className="w-5 h-5" src={"/images/icons/connect.png"} />} className="bg-linear-65 from-[#FF01DD] from-5% to-80% to-[#1D0199] font-bold text-white rounded-4xl">
 						Connect Wallet
 					</Button>

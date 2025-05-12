@@ -4,18 +4,98 @@ import { RiSparklingFill } from "react-icons/ri";
 import { PiPaperPlaneRightLight } from "react-icons/pi";
 import { Link } from "@heroui/link";
 import AppBackBtn from "@/components/btn/AppBackBtn";
+import { useState, useEffect, useRef } from "react";
+import io, { Socket } from "socket.io-client";
+import { API_URL_WEBSOCKETS } from "@/env";
 
 type AgentChipProps = {
 	text: string;
 	href: string;
 };
 
+type Message = {
+	type: "user" | "agent";
+	content: string;
+};
+
 const HomeAppSearch = () => {
+	const [socket, setSocket] = useState<Socket | null>(null);
+	const [sessionId, setSessionId] = useState<string | null>(null);
+	const [message, setMessage] = useState("");
+	const [messages, setMessages] = useState<Message[]>([]);
+	const [error, setError] = useState<string | null>(null);
+	const messagesRef = useRef<HTMLDivElement>(null);
+
+	// Initialize Socket.IO connection
+	useEffect(() => {
+		const newSocket = io(API_URL_WEBSOCKETS, { autoConnect: true });
+		setSocket(newSocket);
+
+		newSocket.on("connect", () => {
+			console.log("Connected to WebSocket server");
+			newSocket.emit("create_session");
+		});
+
+		newSocket.on("session_created", ({ sessionId }) => {
+			setSessionId(sessionId);
+			console.log("Session created:", sessionId);
+		});
+
+		newSocket.on("response", ({ content }) => {
+			setMessages((prev) => [...prev, { type: "agent", content }]);
+			scrollToBottom();
+		});
+
+		newSocket.on("error", ({ message }) => {
+			setError(message);
+			console.error("WebSocket error:", message);
+		});
+
+		newSocket.on("session_deleted", ({ message }) => {
+			console.log(message);
+			setSessionId(null);
+			setMessages([]);
+		});
+
+		// Cleanup on unmount
+		return () => {
+			if (newSocket && sessionId) {
+				newSocket.emit("delete_session", { sessionId });
+			}
+			newSocket.disconnect();
+		};
+	}, []); // Empty dependency array to prevent multiple connections
+
+	// Scroll to the latest message
+	const scrollToBottom = () => {
+		if (messagesRef.current) {
+			messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+		}
+	};
+
+	// Handle message submission
+	const handleSendMessage = () => {
+		if (!socket || !sessionId || !message.trim()) return;
+
+		setMessages((prev) => [...prev, { type: "user", content: message }]);
+		socket.emit("interact", { sessionId, message });
+		setMessage(""); // Clear input
+		setError(null); // Clear any previous errors
+		scrollToBottom();
+	};
+
+	// Handle Enter key press
+	const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === "Enter") {
+			handleSendMessage();
+		}
+	};
+
 	return (
 		<div className="text-white relative h-[80vh] mt-4 px-4">
 			<AppBackBtn />
 			<Divider />
-			<div className="space-y-5">
+			<div className="space-y-5 h-[60vh] overflow-y-auto pb-20" ref={messagesRef}>
 				<div className="border border-white/[9%] px-2.5 py-3 rounded-3xl flex gap-2 bg-white/5">
 					<RiSparklingFill className="text-[#6A53E7]" />
 					<p className="text-sm">Hi, you can ask me anything about Agents</p>
@@ -32,11 +112,32 @@ const HomeAppSearch = () => {
 						<AgentChip text="Analysis Bot" href="/home-app/agent-details" />
 					</div>
 				</div>
+				{/* Display user questions and agent responses */}
+				{messages.map((msg, index) => (
+					<div key={index} className={`border border-white/[9%] px-2.5 py-3 rounded-3xl flex gap-2 bg-white/5 ${msg.type === "user" ? "ml-10" : "mr-10"}`}>
+						<RiSparklingFill className="text-[#6A53E7]" />
+						<p className="text-sm">{msg.content}</p>
+					</div>
+				))}
+				{/* Display error */}
+				{error && (
+					<div className="border border-red-500 px-2.5 py-3 rounded-3xl bg-red-500/10">
+						<p className="text-sm text-red-400">{error}</p>
+					</div>
+				)}
 			</div>
 			<div className="absolute bottom-0 w-full px-2 left-1 right-2">
 				<div className="w-full flex items-center gap-2">
-					<input type="text" className="bg-white/5 border border-white/[9%] text-white text-sm rounded-4xl block w-full ps-5 p-3 outline-none shadow-xl" placeholder="Generate AI Agent for ...." />
-					<Button isIconOnly className="rounded-full bg-[#6A53E7]">
+					<input
+						type="text"
+						className="bg-white/5 border border-white/[9%] text-white text-sm rounded-4xl block w-full ps-5 p-3 outline-none shadow-xl"
+						placeholder="Generate AI Agent for ...."
+						value={message}
+						onChange={(e) => setMessage(e.target.value)}
+						onKeyPress={handleKeyPress}
+						disabled={!sessionId}
+					/>
+					<Button isIconOnly className="rounded-full bg-[#6A53E7]" onClick={handleSendMessage} disabled={!sessionId || !message.trim()}>
 						<PiPaperPlaneRightLight className="w-5 h-5 text-white" />
 					</Button>
 				</div>

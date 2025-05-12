@@ -7,6 +7,7 @@ const AppBackBtn = () => {
 
 	return (
 		<Button
+			color="primary"
 			isIconOnly
 			onPress={() => {
 				navigate(-1);

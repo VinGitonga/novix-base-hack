@@ -16,6 +16,7 @@ const carouselData = [
 ];
 
 const HomeAgentDetails = () => {
+	
 	return (
 		<div className="text-white mt-5">
 			<div className="mt-4 px-3">
@@ -29,7 +30,7 @@ const HomeAgentDetails = () => {
 					<h1 className="text-center font-bold text-lg">Shop & Test AI Agents in One Place</h1>
 					<p className="text-center">Discover, try, and buy powerful AI agents built to solve real problems.</p>
 					<div className="flex items-center justify-center gap-5">
-						<Button className="rounded-4xl bg-linear-65 from-white from-5% to-[#0A0248] to-95%">Buy the Agent</Button>
+						{/* <Button className="rounded-4xl bg-linear-65 from-[#ffffff] from-5% to-[#0A0248] to-95%">Buy the Agent</Button> */}
 						<Link href="/home-app/playground" className="text-white underline underline-offset-4">Free Trial</Link>
 					</div>
 				</div>

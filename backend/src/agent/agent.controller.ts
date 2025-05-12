@@ -15,6 +15,7 @@ export class AgentController {
 
 			return res.status(HttpStatus.CREATED).json({ status: "success", data });
 		} catch (err) {
+			console.log('err', err)
 			throw new CustomBadRequestException(err.message);
 		}
 	}
@@ -37,6 +38,18 @@ export class AgentController {
 
 			return res.status(HttpStatus.OK).json({ status: "success", data });
 		} catch (err) {
+			throw new CustomBadRequestException();
+		}
+	}
+
+	@Post("test-create-wallet")
+	async testCreateWallet(@Res() res: AppReply) {
+		try {
+			const data = await this.agentService.testCreateWallet();
+
+			return res.status(200).json({ status: "success", data });
+		} catch (err) {
+			console.log('err', err)
 			throw new CustomBadRequestException();
 		}
 	}
