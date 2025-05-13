@@ -12,6 +12,7 @@ import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
 import { IAgentKitKeys } from "src/types/AgentKit";
 import { CDP_API_KEY, CDP_KEY_NAME, CDP_SECRET_KEY } from "src/env";
 import { createWalletItem } from "src/utils/init-agent";
+import { QueryNLPAgentsDTO, QueryNLPAgentsSchema } from "./dto/query-nlp-agents.dto";
 
 @Injectable()
 export class AgentService {
@@ -106,5 +107,88 @@ export class AgentService {
 		const updatedAgent = await this.agentModel.findByIdAndUpdate(agentId, { $set: { walletMetadata: walletMetadata } }, { new: true });
 
 		return updatedAgent;
+	}
+
+	// async searchAgentsByNLP(body: QueryNLPAgentsDTO) {
+	// 	const { query, maxResults = 10 } = body;
+
+	// 	if (!query) {
+	// 		throw new Error("Query is required");
+	// 	}
+
+	// 	const agents = await this.agentModel
+	// 		.find({ $text: { $search: query } }, { score: { $meta: "textScore" } })
+	// 		.sort({ score: { $meta: "textScore" } })
+	// 		.limit(maxResults)
+	// 		.lean();
+
+	// 	return { results: agents, count: agents.length };
+	// }
+	async searchAgentsByNLP(body: unknown) {
+		// Validate input with Zod
+		const parsedBody = QueryNLPAgentsSchema.safeParse(body);
+		if (!parsedBody.success) {
+			throw new Error(`Invalid query parameters: ${JSON.stringify(parsedBody.error.format())}`);
+		}
+
+		const { query = "", maxResults = 10, skip = 0, filters = {}, sort = { field: "score", order: "desc" } } = parsedBody.data;
+
+		// Build the query
+		const matchStage: any = {};
+
+		// Add text search if query is provided
+		if (query) {
+			matchStage.$text = { $search: query };
+		}
+
+		// Add filters
+		if (filters.price) {
+			matchStage.price = {};
+			if (filters.price.min !== undefined) matchStage.price.$gte = filters.price.min;
+			if (filters.price.max !== undefined) matchStage.price.$lte = filters.price.max;
+		}
+
+		if (filters.credits) {
+			matchStage.credits = {};
+			if (filters.credits.min !== undefined) matchStage.credits.$gte = filters.credits.min;
+			if (filters.credits.max !== undefined) matchStage.credits.$lte = filters.credits.max;
+		}
+
+		if (filters.topics && filters.topics.length > 0) {
+			matchStage.topics = { $in: filters.topics };
+		}
+
+		if (filters.agentType) {
+			matchStage.agentType = filters.agentType;
+		}
+
+		if (filters.pricingModel) {
+			matchStage.pricingModel = filters.pricingModel;
+		}
+
+		// Build sort stage
+		const sortStage: any = {};
+		if (sort.field === "score" && query) {
+			sortStage.score = { $meta: "textScore" };
+		} else {
+			sortStage[sort.field] = sort.order === "asc" ? 1 : -1;
+		}
+
+		// Execute query
+		const agents = await this.agentModel
+			.find(matchStage, query ? { score: { $meta: "textScore" } } : {})
+			.sort(sortStage)
+			.skip(skip)
+			.limit(maxResults)
+			.lean();
+
+		// Get total count for pagination
+		const totalCount = await this.agentModel.countDocuments(matchStage);
+
+		return {
+			results: agents,
+			count: agents.length,
+			totalCount,
+		};
 	}
 }

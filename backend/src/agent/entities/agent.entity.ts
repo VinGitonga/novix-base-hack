@@ -65,3 +65,5 @@ export class Agent {
 export const AgentSchema = SchemaFactory.createForClass(Agent);
 
 AgentSchema.index({ summary: "text", description: "text", topics: "text", bio: "text", prompt: "text", name: "text" });
+AgentSchema.index({ price: 1 });
+AgentSchema.index({ credits: 1 });
