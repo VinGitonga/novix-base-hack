@@ -7,6 +7,8 @@ import AppBackBtn from "@/components/btn/AppBackBtn";
 import { useState, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 import { API_URL_WEBSOCKETS } from "@/env";
+import { addToast, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
+import AppInput from "@/components/forms/AppInput";
 
 type AgentChipProps = {
 	text: string;
@@ -25,6 +27,8 @@ const HomeAppSearch = () => {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const messagesRef = useRef<HTMLDivElement>(null);
+	const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+	const [privateKeyVal, setPrivateKeyVal] = useState<string>("");
 
 	// Initialize Socket.IO connection
 	useEffect(() => {
@@ -91,6 +95,22 @@ const HomeAppSearch = () => {
 		}
 	};
 
+	const handleAddWalletToAgent = () => {
+		if (!socket || !sessionId) {
+			addToast({ title: "Error", description: "No session available", severity: "warning" });
+			return;
+		}
+
+		if (!privateKeyVal) {
+			addToast({ title: "Error", description: "Add your wallet private key", severity: "danger" });
+			return;
+		}
+
+		socket.emit("add_wallet", { sessionId, privateKey: privateKeyVal });
+		onClose();
+		addToast({ title: "Success", description: "Wallet Added to session" });
+	};
+
 	return (
 		<div className="text-white relative h-[80vh] mt-4 px-4">
 			<AppBackBtn />
@@ -110,6 +130,9 @@ const HomeAppSearch = () => {
 						<AgentChip text="ImageGen" href="/home-app/agent-details" />
 						<AgentChip text="Finance Bot" href="/home-app/agent-details" />
 						<AgentChip text="Analysis Bot" href="/home-app/agent-details" />
+						<div className="flex items-center justify-center border border-[#6A53E7] rounded-4xl py-1 text-sm w-full text-white" onClick={onOpen}>
+							Configure Wallet
+						</div>
 					</div>
 				</div>
 				{/* Display user questions and agent responses */}
@@ -142,6 +165,26 @@ const HomeAppSearch = () => {
 					</Button>
 				</div>
 			</div>
+			<Modal onOpenChange={onOpenChange} isOpen={isOpen} classNames={{ base: "bg-[#02022B] text-white" }}>
+				<ModalContent className="font-nunito">
+					{(onClose) => (
+						<>
+							<ModalHeader>Configure your private key to the agent</ModalHeader>
+							<ModalBody>
+								<AppInput label={"Private key"} placeholder="Your Private Key" value={privateKeyVal} setValue={setPrivateKeyVal} />
+							</ModalBody>
+							<ModalFooter>
+								<Button color="danger" variant="light" onPress={onClose}>
+									Close
+								</Button>
+								<Button color="primary" onPress={handleAddWalletToAgent}>
+									Submit
+								</Button>
+							</ModalFooter>
+						</>
+					)}
+				</ModalContent>
+			</Modal>
 		</div>
 	);
 };

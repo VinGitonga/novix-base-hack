@@ -1,14 +1,22 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { InjectModel } from "@nestjs/mongoose";
 import { AxiosRequestConfig } from "axios";
 import { firstValueFrom } from "rxjs";
+import { Payment } from "./entities/payment.entity";
+import { Model } from "mongoose";
+import { Credits } from "./entities/credits.entity";
+import { NewPaymentDTO } from "./dto/new-payment.dto";
+import { NewCreditsDTO, UpdateCreditsActions } from "./dto/new-credits.dto";
 
 @Injectable()
 export class PaymentsService {
 	constructor(
 		private readonly httpService: HttpService,
 		private readonly configService: ConfigService,
+		@InjectModel(Payment.name) private readonly paymentModel: Model<Payment>,
+		@InjectModel(Credits.name) private readonly creditsModel: Model<Credits>,
 	) {}
 
 	async createCoinbaseCharge() {
@@ -32,5 +40,50 @@ export class PaymentsService {
 		const resp = await firstValueFrom(observableResp);
 
 		return resp.data;
+	}
+
+	async newPayment(body: NewPaymentDTO) {
+		const payment = this.paymentModel.create(body);
+
+		const savedPayment = await (await payment).save();
+
+		if (savedPayment.type === "credits") {
+			// setup new credits for the wallet
+			const dataInfo = {
+				wallet: body.payer,
+				agent: body.targetAgent,
+				count: body.amount,
+			};
+
+			await this.newCredits(dataInfo);
+		}
+
+		return savedPayment;
+	}
+
+	async newCredits(body: NewCreditsDTO) {
+		const credit = this.creditsModel.create(body);
+
+		const savedCredits = await (await credit).save();
+
+		return savedCredits;
+	}
+
+	async updateCreditUsageCredits(body: UpdateCreditsActions) {
+		// get credits by agent and wallet
+		const creditItem = await this.creditsModel.findOne({ wallet: body.wallet, agent: body.agent });
+
+		if (!creditItem) {
+			// create a new agent credits
+			const newCredits = await this.newCredits({ wallet: body.wallet, agent: body.agent, count: body.count });
+
+			return newCredits;
+		}
+
+		const newCount = body.actionType === "increment" ? Number(creditItem.count) + Number(body.count) : Number(creditItem.count) - Number(body.count);
+
+		const updatedCredits = await this.creditsModel.findByIdAndUpdate(creditItem._id, { $set: { count: newCount } }, { new: true });
+
+		return updatedCredits;
 	}
 }

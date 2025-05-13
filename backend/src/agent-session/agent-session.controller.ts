@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, HttpStatus, Logger, Param, Post, Res } from "@nestjs/common";
 import { AgentSessionService } from "./agent-session.service";
 import { ChatOpenAI } from "@langchain/openai";
-import { AgentKit, AgentKitOptions, ViemWalletProvider } from "@coinbase/agentkit";
+import { AgentKit, AgentKitOptions, ViemWalletProvider, walletActionProvider } from "@coinbase/agentkit";
 import { ConfigService } from "@nestjs/config";
 import { IAgentKitKeys } from "src/types/AgentKit";
 import { getLangChainTools } from "@coinbase/agentkit-langchain";
@@ -118,6 +118,7 @@ export class AgentSessionController {
 			const newConfig = {
 				...session.agentConfig,
 				walletProvider: walletProvider,
+				actionProviders: [...session.agentConfig.actionProviders, walletActionProvider()],
 			} satisfies AgentKitOptions;
 
 			const agentKit = await AgentKit.from(newConfig);
@@ -257,6 +258,7 @@ export class AgentSessionGateway {
 			const newConfig = {
 				...session.agentConfig,
 				walletProvider: walletProvider,
+				actionProviders: [...session.agentConfig.actionProviders, walletActionProvider()],
 			} satisfies AgentKitOptions;
 
 			const agentKit = await AgentKit.from(newConfig);
