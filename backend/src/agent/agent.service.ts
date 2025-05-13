@@ -4,15 +4,14 @@ import { Agent } from "./entities/agent.entity";
 import { Model } from "mongoose";
 import { CreateCustomAgentDTO } from "./dto/create-custom-agent.dto";
 import { HttpService } from "@nestjs/axios";
-import { AxiosRequestConfig } from "axios";
 import { ConfigService } from "@nestjs/config";
-import { firstValueFrom } from "rxjs";
 import { ObjectId } from "mongodb";
-import { Coinbase, Wallet } from "@coinbase/coinbase-sdk";
+import { Coinbase } from "@coinbase/coinbase-sdk";
 import { IAgentKitKeys } from "src/types/AgentKit";
-import { CDP_API_KEY, CDP_KEY_NAME, CDP_SECRET_KEY } from "src/env";
 import { createWalletItem } from "src/utils/init-agent";
-import { QueryNLPAgentsDTO, QueryNLPAgentsSchema } from "./dto/query-nlp-agents.dto";
+import { QueryNLPAgentsSchema } from "./dto/query-nlp-agents.dto";
+import { TrfAgentOwnershipDTO } from "./dto/trf-agent-ownership.dto";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class AgentService {
@@ -22,6 +21,7 @@ export class AgentService {
 		@InjectModel(Agent.name) private readonly agentModel: Model<Agent>,
 		private readonly httpService: HttpService,
 		private readonly configService: ConfigService,
+		private readonly userService: UserService,
 	) {
 		this.fastApiBaseUrl = this.configService.get("fast_api_uri");
 		this.coinbaseSdk = Coinbase.configure({
@@ -190,5 +190,11 @@ export class AgentService {
 			count: agents.length,
 			totalCount,
 		};
+	}
+
+	async updateAgentOwnerShip(body: TrfAgentOwnershipDTO) {
+		const newOwnerData = await this.userService.getAccountByWallet(body.newOwnerWallet);
+
+		await this.agentModel.findByIdAndUpdate(body.agentId, { $set: { owner: newOwnerData._id } });
 	}
 }

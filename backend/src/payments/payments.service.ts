@@ -53,9 +53,10 @@ export class PaymentsService {
 				wallet: body.payer,
 				agent: body.targetAgent,
 				count: body.amount,
+				actionType: "increment"
 			};
 
-			await this.newCredits(dataInfo);
+			await this.updateCreditUsageCredits(dataInfo);
 		}
 
 		return savedPayment;

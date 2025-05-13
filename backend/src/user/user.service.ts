@@ -23,4 +23,8 @@ export class UserService {
 	async getAccountByWallet(wallet: string) {
 		return await this.userModel.findOne({ wallet });
 	}
+
+	async getAccountDetailsById(id: string) {
+		return await this.userModel.findById(id);
+	}
 }
