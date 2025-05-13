@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, HttpStatus, Logger, Param, Post, Res } from "@nestjs/common";
 import { AgentSessionService } from "./agent-session.service";
 import { ChatOpenAI } from "@langchain/openai";
-import { AgentKit } from "@coinbase/agentkit";
+import { AgentKit, AgentKitOptions, ViemWalletProvider } from "@coinbase/agentkit";
 import { ConfigService } from "@nestjs/config";
 import { IAgentKitKeys } from "src/types/AgentKit";
 import { getLangChainTools } from "@coinbase/agentkit-langchain";
@@ -16,11 +16,16 @@ import { Server, Socket } from "socket.io";
 import { AGENT_PERSONALITY } from "src/constants/app_personality";
 import { appAgentActionProvider } from "src/action-providers/appAgentActionProvider";
 import { AgentService } from "src/agent/agent.service";
+import { privateKeyToAccount } from "viem/accounts";
+import { createWalletClient, http } from "viem";
+import { baseSepolia } from "viem/chains";
 
 interface Session {
 	agent: any;
 	config: any;
 	memory: MemorySaver;
+	agentConfig: AgentKitOptions;
+	llm: any;
 }
 class InteractDto {
 	message: string;
@@ -46,11 +51,9 @@ export class AgentSessionController {
 			throw new CustomBadRequestException("Unable to setup the session");
 		}
 
-		const { agent, config } = agentInfo;
+		const { agent, config, agentConfig, llm, memory } = agentInfo;
 
-		const memory = new MemorySaver();
-
-		sessions.set(sessionId, { agent, config: { ...config, configurable: { thread_id: sessionId } }, memory });
+		sessions.set(sessionId, { agent, config: { ...config, configurable: { thread_id: sessionId } }, memory, agentConfig, llm });
 
 		return res.status(HttpStatus.CREATED).json({ status: "success", data: sessionId });
 	}
@@ -94,6 +97,46 @@ export class AgentSessionController {
 		throw new CustomBadRequestException("Unable to remove session");
 	}
 
+	@Post("add-wallet/:sessionId")
+	async addWallet(@Param("sessionId") sessionId: string, @Body() body: { privateKey: string }, @Res() res: AppReply<string>) {
+		if (!body.privateKey) {
+			throw new CustomBadRequestException("Private key is required");
+		}
+
+		const session = sessions.get(sessionId);
+		if (!session) {
+			throw new CustomBadRequestException("Session not found");
+		}
+
+		try {
+			const account = privateKeyToAccount(`0x${body.privateKey}`);
+
+			const client = createWalletClient({ account, chain: baseSepolia, transport: http() });
+
+			const walletProvider = new ViemWalletProvider(client);
+
+			const newConfig = {
+				...session.agentConfig,
+				walletProvider: walletProvider,
+			} satisfies AgentKitOptions;
+
+			const agentKit = await AgentKit.from(newConfig);
+
+			const tools = await getLangChainTools(agentKit);
+
+			const agent = createReactAgent({
+				llm: session.llm,
+				tools,
+				messageModifier: AGENT_PERSONALITY,
+				checkpointer: session.memory,
+			});
+
+			sessions.set(sessionId, { agent: agent, memory: session.memory, config: session.config, agentConfig: newConfig, llm: session.llm });
+		} catch (err) {
+			throw new CustomBadRequestException(err.message);
+		}
+	}
+
 	private async initializeAgent() {
 		try {
 			const llm = new ChatOpenAI({
@@ -101,21 +144,26 @@ export class AgentSessionController {
 				apiKey: this.configService.get("agent_kit.openai_api_key", { infer: true }),
 			});
 
-			const agentKit = await AgentKit.from({
+			const config = {
 				cdpApiKeyName: this.configService.get("agent_kit.api_key", { infer: true }),
 				cdpApiKeyPrivateKey: this.configService.get("agent_kit.secret_key", { infer: true }),
 				actionProviders: [appAgentActionProvider(this.agentService)],
-			});
+			} satisfies AgentKitOptions;
+
+			const agentKit = await AgentKit.from(config);
 
 			const tools = await getLangChainTools(agentKit);
+
+			const memory = new MemorySaver();
 
 			const agent = createReactAgent({
 				llm,
 				tools,
+				checkpointSaver: memory,
 				messageModifier: AGENT_PERSONALITY,
 			});
 
-			return { agent, config: { configurable: { thread_id: "default" } } };
+			return { agent, config: { configurable: { thread_id: "default" } }, agentConfig: config, llm, memory };
 		} catch (err) {
 			this.logger.error(`Failed to init an agent: `, err);
 			return null;
@@ -145,10 +193,9 @@ export class AgentSessionGateway {
 			return;
 		}
 
-		const { agent, config } = agentInfo;
-		const memory = new MemorySaver();
+		const { agent, config, llm, memory, agentConfig } = agentInfo;
 
-		sessions.set(sessionId, { agent, config: { ...config, configurable: { thread_id: sessionId } }, memory });
+		sessions.set(sessionId, { agent, config: { ...config, configurable: { thread_id: sessionId } }, memory, llm, agentConfig });
 
 		client.emit("session_created", { sessionId });
 		this.logger.log(`Session created: ${sessionId} for client ${client.id}`);
@@ -183,6 +230,62 @@ export class AgentSessionGateway {
 		}
 	}
 
+	@SubscribeMessage("add_wallet")
+	async handleAddWallet(@MessageBody() data: { sessionId: string; privateKey: string }, @ConnectedSocket() client: Socket) {
+		if (!data.privateKey) {
+			client.emit("error", { message: "Private key is required" });
+			return;
+		}
+
+		const session = sessions.get(data.sessionId);
+		if (!session) {
+			client.emit("error", { message: "Session not found" });
+			return;
+		}
+
+		try {
+			const account = privateKeyToAccount(`0x${data.privateKey}`);
+
+			const clientWallet = createWalletClient({
+				account,
+				chain: baseSepolia,
+				transport: http(),
+			});
+
+			const walletProvider = new ViemWalletProvider(clientWallet);
+
+			const newConfig = {
+				...session.agentConfig,
+				walletProvider: walletProvider,
+			} satisfies AgentKitOptions;
+
+			const agentKit = await AgentKit.from(newConfig);
+
+			const tools = await getLangChainTools(agentKit);
+
+			const agent = createReactAgent({
+				llm: session.llm,
+				tools,
+				messageModifier: AGENT_PERSONALITY,
+				checkpointer: session.memory,
+			});
+
+			sessions.set(data.sessionId, {
+				agent,
+				memory: session.memory,
+				config: session.config,
+				agentConfig: newConfig,
+				llm: session.llm,
+			});
+
+			client.emit("wallet_added", { message: "Wallet successfully added to session" });
+			this.logger.log(`Wallet added to session: ${data.sessionId} for client ${client.id}`);
+		} catch (err) {
+			this.logger.error(`Failed to add wallet for session ${data.sessionId}:`, err);
+			client.emit("error", { message: err.message || "Failed to add wallet" });
+		}
+	}
+
 	@SubscribeMessage("delete_session")
 	handleDeleteSession(@MessageBody() data: { sessionId: string }, @ConnectedSocket() client: Socket) {
 		if (sessions.delete(data.sessionId)) {
@@ -200,21 +303,26 @@ export class AgentSessionGateway {
 				apiKey: this.configService.get("agent_kit.openai_api_key", { infer: true }),
 			});
 
-			const agentKit = await AgentKit.from({
+			const config = {
 				cdpApiKeyName: this.configService.get("agent_kit.api_key", { infer: true }),
 				cdpApiKeyPrivateKey: this.configService.get("agent_kit.secret_key", { infer: true }),
 				actionProviders: [appAgentActionProvider(this.agentService)],
-			});
+			} satisfies AgentKitOptions;
+
+			const agentKit = await AgentKit.from(config);
 
 			const tools = await getLangChainTools(agentKit);
+
+			const memory = new MemorySaver();
 
 			const agent = createReactAgent({
 				llm,
 				tools,
+				checkpointSaver: memory,
 				messageModifier: AGENT_PERSONALITY,
 			});
 
-			return { agent, config: { configurable: { thread_id: "default" } } };
+			return { agent, config: { configurable: { thread_id: "default" } }, agentConfig: config, llm, memory };
 		} catch (err) {
 			this.logger.error(`Failed to init an agent: `, err);
 			return null;
