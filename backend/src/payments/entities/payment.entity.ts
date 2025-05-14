@@ -18,6 +18,9 @@ export class Payment {
 
 	@Prop()
 	remarks: string;
+
+	@Prop()
+	txHash: string
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

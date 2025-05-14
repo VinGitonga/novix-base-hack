@@ -19,6 +19,7 @@ import { AgentService } from "src/agent/agent.service";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, http } from "viem";
 import { baseSepolia } from "viem/chains";
+import { PaymentsService } from "src/payments/payments.service";
 
 interface Session {
 	agent: any;
@@ -40,6 +41,7 @@ export class AgentSessionController {
 		private readonly agentSessionService: AgentSessionService,
 		private readonly configService: ConfigService<{ agent_kit: IAgentKitKeys }>,
 		private agentService: AgentService,
+		private paymentService: PaymentsService,
 	) {}
 
 	@Post("create")
@@ -148,7 +150,7 @@ export class AgentSessionController {
 			const config = {
 				cdpApiKeyName: this.configService.get("agent_kit.api_key", { infer: true }),
 				cdpApiKeyPrivateKey: this.configService.get("agent_kit.secret_key", { infer: true }),
-				actionProviders: [appAgentActionProvider(this.agentService)],
+				actionProviders: [appAgentActionProvider(this.agentService, {}, this.paymentService)],
 			} satisfies AgentKitOptions;
 
 			const agentKit = await AgentKit.from(config);
@@ -182,6 +184,7 @@ export class AgentSessionGateway {
 	constructor(
 		private readonly configService: ConfigService<{ agent_kit: IAgentKitKeys }>,
 		private agentService: AgentService,
+		private paymentService: PaymentsService,
 	) {}
 
 	@SubscribeMessage("create_session")
@@ -308,7 +311,7 @@ export class AgentSessionGateway {
 			const config = {
 				cdpApiKeyName: this.configService.get("agent_kit.api_key", { infer: true }),
 				cdpApiKeyPrivateKey: this.configService.get("agent_kit.secret_key", { infer: true }),
-				actionProviders: [appAgentActionProvider(this.agentService)],
+				actionProviders: [appAgentActionProvider(this.agentService, {}, this.paymentService)],
 			} satisfies AgentKitOptions;
 
 			const agentKit = await AgentKit.from(config);

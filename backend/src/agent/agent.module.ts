@@ -6,9 +6,10 @@ import { Agent, AgentSchema } from "./entities/agent.entity";
 import { HttpModule } from "@nestjs/axios";
 import { Coinbase } from "@coinbase/coinbase-sdk";
 import * as path from "path";
+import { UserModule } from "src/user/user.module";
 
 @Module({
-	imports: [MongooseModule.forFeature([{ name: Agent.name, schema: AgentSchema }]), HttpModule],
+	imports: [MongooseModule.forFeature([{ name: Agent.name, schema: AgentSchema }]), HttpModule, UserModule],
 	controllers: [AgentController],
 	providers: [AgentService],
 	exports: [AgentService],

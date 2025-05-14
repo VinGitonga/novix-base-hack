@@ -16,5 +16,6 @@ import { Credits, CreditsSchema } from "./entities/credits.entity";
 	],
 	controllers: [PaymentsController],
 	providers: [PaymentsService],
+	exports:[PaymentsService]
 })
 export class PaymentsModule {}

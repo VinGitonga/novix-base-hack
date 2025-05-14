@@ -16,4 +16,7 @@ export class NewPaymentDTO {
 
 	@IsString()
 	remarks: string;
+
+	@IsString()
+	txHash: string
 }
