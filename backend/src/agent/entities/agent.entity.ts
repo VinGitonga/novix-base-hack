@@ -25,6 +25,9 @@ export class Agent {
 	@Prop({ type: Array, default: [] })
 	topics: string[];
 
+	@Prop({ type: Array, default: [] })
+	tags: string[];
+
 	@Prop()
 	elizaId: string;
 
@@ -60,6 +63,9 @@ export class Agent {
 
 	@Prop({ required: false, type: Object })
 	walletMetadata: Record<string, string>;
+
+	@Prop({ type: Array })
+	features: { name: string; summary: string }[];
 }
 
 export const AgentSchema = SchemaFactory.createForClass(Agent);

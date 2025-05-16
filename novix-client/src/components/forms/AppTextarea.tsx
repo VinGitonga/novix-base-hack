@@ -1,5 +1,5 @@
 import { Textarea, TextAreaProps } from "@heroui/input";
-import { Control, Controller, FieldError } from "react-hook-form";
+import { Control, Controller, FieldError, Merge } from "react-hook-form";
 
 interface CommonProps extends TextAreaProps {}
 
@@ -11,7 +11,8 @@ interface UnControlledProps extends CommonProps {
 interface ControlledProps extends CommonProps {
 	name: string;
 	control: Control<any>;
-	error: FieldError;
+	error: FieldError | Merge<FieldError, FieldError[]>;
+	
 }
 
 type AppTextareaProps = UnControlledProps | ControlledProps;

@@ -7,7 +7,7 @@ import { Button } from "@heroui/button";
 import { LuMinus, LuPlus } from "react-icons/lu";
 import { addToast, Alert, Divider } from "@heroui/react";
 import { z } from "zod";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AppInput from "@/components/forms/AppInput";
 import AppTextarea from "@/components/forms/AppTextarea";
@@ -19,6 +19,7 @@ import axios from "axios";
 import { API_CUSTOMA_AGENTS_BASE_URL } from "@/env";
 import useAgentUtils from "@/hooks/useAgentUtils";
 import { useNavigate } from "react-router";
+import { useAuthStore } from "@/hooks/store/useAuthStore";
 
 type EnvItem = {
 	key: string;
@@ -40,6 +41,11 @@ const pricingCategory = [
 	},
 ] satisfies IOption[];
 
+const featuresSchema = z.object({
+	name: z.string(),
+	summary: z.string(),
+});
+
 const formSchema = z.object({
 	agentName: z.string().min(1, { message: "Agent name is required" }),
 	agentSummary: z.string().min(1, { message: "Agent summary is required" }),
@@ -56,6 +62,7 @@ const formSchema = z.object({
 		}
 		return String(parsed);
 	}),
+	features: z.array(featuresSchema).min(1, { message: "Add atleast one feature detail" }),
 });
 
 const UploadAgent = () => {
@@ -68,6 +75,8 @@ const UploadAgent = () => {
 
 	const { createCustomAgent } = useAgentUtils();
 	const navigate = useNavigate();
+
+	const { account } = useAuthStore();
 
 	const onDrop = useCallback(async <T extends File>(acceptedFiles: T[]) => {
 		const agentFile = acceptedFiles.find((item) => item.name.endsWith(".py"));
@@ -92,7 +101,7 @@ const UploadAgent = () => {
 
 	const formMethods = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { agentName: "", agentDescription: "", categoryTags: "", inputExample: "", outputExample: "", price: "0", pricingCategory: "" },
+		defaultValues: { agentName: "", agentDescription: "", categoryTags: "", inputExample: "", outputExample: "", price: "0", pricingCategory: "", features: [{ name: "", summary: "" }] },
 	});
 
 	const {
@@ -101,6 +110,8 @@ const UploadAgent = () => {
 		control,
 		reset,
 	} = formMethods;
+
+	const { fields, append, remove } = useFieldArray({ name: "features", control });
 
 	const saveAgent = async (data: z.infer<typeof formSchema>, fastId: string) => {
 		try {
@@ -113,12 +124,19 @@ const UploadAgent = () => {
 				fastId,
 				inputExample: data.inputExample,
 				outputExample: data.outputExample,
+				tags: [data.categoryTags],
+				features: data.features,
+				owner: account?._id,
 			};
 			await createCustomAgent(info);
 		} catch (err) {}
 	};
 
 	const onSubmit = handleSubmit(async (data) => {
+		if (!account) {
+			addToast({ title: "Error", description: `Please setup your account first in order to create an agent`, severity: "warning" });
+			return;
+		}
 		let envObj: Record<string, string> = {};
 		Object.values(envVariables).forEach((item) => {
 			envObj[item.key] = item.value;
@@ -142,6 +160,7 @@ const UploadAgent = () => {
 			addToast({ title: "Success", description: "Agent saved successfully", color: "primary" });
 			navigate("/app/agents/my");
 		} catch (err) {
+			console.log("errerere", err);
 		} finally {
 			setLoading(false);
 		}
@@ -169,6 +188,10 @@ const UploadAgent = () => {
 		setEnvVariables(newItems);
 	};
 
+	const appendFeatureItem = () => {
+		append({ name: "", summary: "" });
+	};
+
 	return (
 		<div>
 			<div className="space-y-2">
@@ -193,6 +216,24 @@ const UploadAgent = () => {
 									error={formErrors.categoryTags!}
 									placeholder="Choose ..."
 								/>
+								<p className="font-semibold">Features</p>
+								{fields &&
+									fields.map((field, idx) => (
+										<div key={field.id}>
+											<AppInput label={"Name"} placeholder="Name of the feature" name={`features.${idx}.name`} control={control} error={formErrors?.features?.[idx]?.name} />
+											<AppTextarea label={"Summary"} placeholder="Describe this feature" name={`features.${idx}.summary`} control={control} error={formErrors?.features?.[idx]?.summary} />
+											{fields.length > 1 && (
+												<Button isIconOnly onPress={() => remove(idx)}>
+													<LuMinus className="w-5 h-5" />
+												</Button>
+											)}
+											<Divider />
+										</div>
+									))}
+								<Button startContent={<LuPlus />} size={"sm"} onPress={appendFeatureItem}>
+									Add Feature
+								</Button>
+								<Divider />
 								<div className="flex items-center justify-end">
 									<Button type="button" onPress={() => setSelectedKey("technical")}>
 										Next

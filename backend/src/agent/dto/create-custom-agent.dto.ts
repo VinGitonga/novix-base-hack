@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateCustomAgentDTO {
 	@IsString()
@@ -28,4 +28,12 @@ export class CreateCustomAgentDTO {
 
 	@IsString()
 	outputExample: string;
+
+	@IsArray()
+	@IsOptional()
+	tags: string[];
+
+	@IsArray()
+	@IsOptional()
+	features: Record<string, any>[];
 }
