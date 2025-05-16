@@ -29,8 +29,68 @@ const HomeAppSearch = () => {
 	const messagesRef = useRef<HTMLDivElement>(null);
 	const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 	const [privateKeyVal, setPrivateKeyVal] = useState<string>("");
+	const [isStreaming, setIsStreaming] = useState(false);
 
 	// Initialize Socket.IO connection
+	// useEffect(() => {
+	// 	const newSocket = io(API_URL_WEBSOCKETS, { autoConnect: true });
+	// 	setSocket(newSocket);
+
+	// 	newSocket.on("connect", () => {
+	// 		console.log("Connected to WebSocket server");
+	// 		newSocket.emit("create_session");
+	// 	});
+
+	// 	newSocket.on("session_created", ({ sessionId }) => {
+	// 		setSessionId(sessionId);
+	// 		console.log("Session created:", sessionId);
+	// 	});
+
+	// 	newSocket.on("response", ({ content, type }) => {
+	// 		if (type === "done") {
+	// 			setIsStreaming(false); // Stop streaming
+	// 		} else {
+	// 			setMessages((prev) => {
+	// 				const lastMessage = prev[prev.length - 1];
+	// 				// Check if the last message is an agent message and we're streaming
+	// 				if (lastMessage?.type === "agent" && isStreaming) {
+	// 					// Append the new word to the existing content
+	// 					return [
+	// 						...prev.slice(0, -1),
+	// 						{
+	// 							...lastMessage,
+	// 							content: lastMessage.content + (lastMessage.content ? " " : "") + content,
+	// 						},
+	// 					];
+	// 				}
+	// 				// Create a new agent message for the first word
+	// 				return [...prev, { type: "agent", content }];
+	// 			});
+	// 			setIsStreaming(true); // Start or continue streaming
+	// 			scrollToBottom();
+	// 		}
+	// 	});
+
+	// 	newSocket.on("error", ({ message }) => {
+	// 		setError(message);
+	// 		console.error("WebSocket error:", message);
+	// 	});
+
+	// 	newSocket.on("session_deleted", ({ message }) => {
+	// 		console.log(message);
+	// 		setSessionId(null);
+	// 		setMessages([]);
+	// 	});
+
+	// 	// Cleanup on unmount
+	// 	return () => {
+	// 		if (newSocket && sessionId) {
+	// 			newSocket.emit("delete_session", { sessionId });
+	// 		}
+	// 		newSocket.disconnect();
+	// 	};
+	// }, []); // Empty dependency array to prevent multiple connections
+
 	useEffect(() => {
 		const newSocket = io(API_URL_WEBSOCKETS, { autoConnect: true });
 		setSocket(newSocket);
@@ -45,9 +105,39 @@ const HomeAppSearch = () => {
 			console.log("Session created:", sessionId);
 		});
 
-		newSocket.on("response", ({ content }) => {
-			setMessages((prev) => [...prev, { type: "agent", content }]);
-			scrollToBottom();
+		newSocket.on("response", ({ content, type }) => {
+			console.log("Received response:", { content, type }); // Debug log
+			if (type === "done") {
+				setIsStreaming(false);
+				console.log("Streaming stopped, messages:", messages); // Debug log
+			} else {
+				// Validate content and type
+				if (!content || typeof content !== "string") {
+					console.warn("Invalid content received:", content);
+					return;
+				}
+				setIsStreaming(true); // Set streaming state first
+				setMessages((prev) => {
+					const lastMessage = prev[prev.length - 1];
+					console.log("Current messages:", prev, "isStreaming:", isStreaming); // Debug log
+					// Handle punctuation to avoid extra spaces
+					const noSpaceBefore = [",", ".", "!", "?", ":", ";"];
+					const separator = lastMessage?.content && !noSpaceBefore.includes(content) ? " " : "";
+					// Append to last agent message if it exists and we're streaming
+					if (lastMessage?.type === "agent") {
+						return [
+							...prev.slice(0, -1),
+							{
+								...lastMessage,
+								content: lastMessage.content + separator + content,
+							},
+						];
+					}
+					// Create new agent message
+					return [...prev, { type: "agent", content }];
+				});
+				scrollToBottom();
+			}
 		});
 
 		newSocket.on("error", ({ message }) => {
@@ -63,12 +153,21 @@ const HomeAppSearch = () => {
 
 		// Cleanup on unmount
 		return () => {
-			if (newSocket && sessionId) {
-				newSocket.emit("delete_session", { sessionId });
-			}
+			newSocket.off("connect");
+			newSocket.off("session_created");
+			newSocket.off("response");
+			newSocket.off("error");
+			newSocket.off("session_deleted");
+			// Use the current sessionId from state
+			setSessionId((currentSessionId) => {
+				if (newSocket && currentSessionId) {
+					newSocket.emit("delete_session", { sessionId: currentSessionId });
+				}
+				return currentSessionId; // Preserve state
+			});
 			newSocket.disconnect();
 		};
-	}, []); // Empty dependency array to prevent multiple connections
+	}, []); // Empty dependency array as requested
 
 	// Scroll to the latest message
 	const scrollToBottom = () => {
@@ -139,7 +238,8 @@ const HomeAppSearch = () => {
 				{messages.map((msg, index) => (
 					<div key={index} className={`border border-white/[9%] px-2.5 py-3 rounded-3xl flex gap-2 bg-white/5 ${msg.type === "user" ? "ml-10" : "mr-10"}`}>
 						<RiSparklingFill className="text-[#6A53E7]" />
-						<p className="text-sm">{msg.content}</p>
+						{/* <p className="text-sm">{msg.content}</p> */}
+						<p className="text-sm" dangerouslySetInnerHTML={{ __html: msg.content }}></p>
 					</div>
 				))}
 				{/* Display error */}

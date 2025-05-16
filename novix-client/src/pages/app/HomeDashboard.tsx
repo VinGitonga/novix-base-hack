@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { IAgent } from "@/types/Agent";
 import { IApiEndpoint } from "@/types/Api";
 import { swrFetcher } from "@/lib/api-client";
-import {Link as LinkTag} from "react-router"
+import { Link as LinkTag } from "react-router";
 
 const HomeDashboard = () => {
 	const { data: agentsData } = useSWR<IAgent[]>([IApiEndpoint.AGENTS_GET], swrFetcher, { keepPreviousData: true });

@@ -9,6 +9,10 @@ import { getSlicedAddress } from "@/lib/utils";
 import { User } from "@heroui/user";
 import { Button } from "@heroui/button";
 import { LucideMoreVertical, UserCog } from "lucide-react";
+import useSWR from "swr";
+import { useAuthStore } from "@/hooks/store/useAuthStore";
+import { IApiEndpoint } from "@/types/Api";
+import { swrFetcher } from "@/lib/api-client";
 
 const columns: IAppTableColumn[] = [
 	{
@@ -42,14 +46,15 @@ const columns: IAppTableColumn[] = [
 ];
 
 const BillingAgents = () => {
+	const { account } = useAuthStore();
 	const renderCell = useCallback((item: IPayment, columnKey: AppKey) => {
 		switch (columnKey) {
 			case "targetAgent":
-				return <User avatarProps={{ src: "" }} description={item?.targetAgent?.summary} name={item?.targetAgent?.name} />;
+				return <User avatarProps={{ src: "" }} description={item?.agent?.summary} name={item?.agent?.name} />;
 			case "amount":
 				return <span>${item.amount}</span>;
 			case "txHash":
-				return <span>{item.txHash}</span>;
+				return <span>{getSlicedAddress(item.txHash)}</span>;
 			case "createdAt":
 				return <span>{format(new Date(item.createdAt), "PPPp")}</span>;
 			case "payment_status":
@@ -81,9 +86,8 @@ const BillingAgents = () => {
 								],
 							}}>
 							<DropdownItem key={"claim"} startContent={<UserCog size={16} />}>
-								Edit
+								Claim
 							</DropdownItem>
-							
 						</DropdownMenu>
 					</Dropdown>
 				);
@@ -91,6 +95,8 @@ const BillingAgents = () => {
 				return null;
 		}
 	}, []);
+
+	const { data: payments, isLoading } = useSWR<IPayment[]>(!account ? null : [`${IApiEndpoint.PAYMENTS_GET_FOR_WALLET}/${account?.wallet}`], swrFetcher, { keepPreviousData: true });
 	return (
 		<div>
 			<title>Billings</title>
@@ -98,13 +104,7 @@ const BillingAgents = () => {
 				<h1 className="text-lg font-semibold">Billings</h1>
 				<p className="text-gray-300 text-sm">This page allows you to view how much you are earning from your agents</p>
 			</div>
-            <AppTable<IPayment>
-                title={"payments"}
-                data={[]}
-                count={0}
-                isLoading={false}
-                headerColumns={columns}
-                renderCell={renderCell} />
+			<AppTable<IPayment> title={"payments"} data={payments ?? []} count={payments?.length ?? 0} isLoading={isLoading} headerColumns={columns} renderCell={renderCell} />
 		</div>
 	);
 };

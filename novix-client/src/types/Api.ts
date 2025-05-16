@@ -22,6 +22,7 @@ export const enum IApiEndpoint {
 	PAYMENTS_CREATE_CHARGE = "payments/create-charge",
 	ACCOUNTS_CREATE = "users/create",
 	ACCOUNTS_GET_PROFILE = "users/profile/by-wallet",
+	PAYMENTS_GET_FOR_WALLET = "payments/get/for-wallet"
 }
 
 export interface IMethodParams {

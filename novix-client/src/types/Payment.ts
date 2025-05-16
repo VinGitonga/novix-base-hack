@@ -6,7 +6,8 @@ export interface IPayment {
 	type: string;
 	amount: string;
 	payer: string;
-	targetAgent: IAgent
+	targetAgent: string
+	agent?: IAgent;
 	remarks: string;
 	txHash: string;
 	payment_status: "paid" | "not-paid" | "reversed";

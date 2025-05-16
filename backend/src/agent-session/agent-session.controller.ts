@@ -32,6 +32,10 @@ class InteractDto {
 	message: string;
 }
 
+async function delay(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const sessions: Map<string, Session> = new Map();
 
 @Controller("api/agent-session")
@@ -222,10 +226,20 @@ export class AgentSessionGateway {
 			const stream = await session.agent.stream({ messages: [new HumanMessage(data.message)] }, session.config);
 
 			for await (const chunk of stream) {
+				let content = "";
 				if ("agent" in chunk) {
-					client.emit("response", { content: chunk.agent.messages[0].content });
+					content = chunk.agent.messages[0].content;
 				} else if ("tools" in chunk) {
-					client.emit("response", { content: chunk.tools.messages[0].content });
+					content = chunk.tools.messages[0].content;
+				}
+
+				if (content) {
+					const words = content.split(/\s+/); // Split by whitespace
+					for (const word of words) {
+						client.emit("response", { type: "output", content: word });
+						await delay(50); // Wait 50ms before emitting the next word
+					}
+					client.emit("response", { type: "done", content: "" });
 				}
 			}
 		} catch (err) {

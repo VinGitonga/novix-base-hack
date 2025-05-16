@@ -93,4 +93,38 @@ export class PaymentsService {
 
 		return updatedCredits;
 	}
+
+	async getPaymentsForUser(wallet: string) {
+		const payments = await this.paymentModel.aggregate([
+			{
+				$match: {
+					targetRecipient: { $regex: new RegExp(`^${wallet}$`, "i") },
+				},
+			},
+			{
+				$lookup: {
+					from: "agents",
+					let: { agentId: { $toObjectId: "$targetAgent" } },
+					pipeline: [
+						{
+							$match: {
+								$expr: {
+									$eq: ["$_id", "$$agentId"],
+								},
+							},
+						},
+					],
+					as: "agent",
+				},
+			},
+			{
+				$unwind: {
+					path: "$agent",
+					preserveNullAndEmptyArrays: true,
+				},
+			},
+		]);
+
+		return payments;
+	}
 }

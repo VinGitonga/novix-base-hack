@@ -19,6 +19,7 @@ import AgentDetails from "@/pages/app/AgentDetails";
 import AgentPlay from "@/pages/app/AgentPlay";
 import NewAgentPlay from "@/pages/app/NewAgentPlay";
 import BillingAgents from "@/pages/app/BillingAgents";
+import HomeMyAgents from "@/pages/app/HomeMyAgents";
 
 const router = createBrowserRouter([
 	{
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
 				children: [
 					{ path: "", element: <HomeDashboard /> },
 					{ path: "search", element: <HomeAppSearch /> },
+					{ path: "my-agents", element: <HomeMyAgents /> },
 					{ path: "agent-details", element: <HomeAgentDetails /> },
 					{ path: "playground", element: <Playground /> },
 					{ path: "agent-profile/:id", element: <AgentDetails /> },

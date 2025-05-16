@@ -64,53 +64,107 @@ export class AppAgentActionProvider extends ActionProvider<WalletProvider> {
 	 * @param args - The search query parameters
 	 * @returns A JSON string containing the search results or error message
 	 */
-	@CreateAction({
-		name: "search_agents",
-		description: `
-This tool searches for AI agents in the Novix AI Marketplace using natural language queries and filters.
+		@CreateAction({
+			name: "search_agents",
+			description: `
+	This tool searches for AI agents in the Novix AI Marketplace using natural language queries and filters.
 
-A successful response returns a message with the API response as a JSON payload containing all agent fields:
-    {
-      "results": [
-        {
-          "_id": "123",
-          "name": "ChatBot",
-          "description": "A versatile chatbot for customer support",
-          "summary": "AI-powered chatbot",
-          "price": 50,
-          "credits": 10,
-          "topics": ["chatbot", "support"],
-          "username": "chatbot123",
-          "bio": ["AI assistant", "Customer support"],
-          "prompt": "How can I help you today?",
-          "elizaId": "eliza456",
-          "fastId": "fast789",
-          "worldId": null,
-          "elizaMetadata": {},
-          "owner": "user123",
-          "pricingModel": "subscription",
-          "agentType": "custom",
-          "inputExample": "Schedule a meeting",
-          "outputExample": "Meeting scheduled!",
-          "walletMetadata": {}
-        }
-      ],
-      "count": 1,
-      "totalCount": 1
-    }
+	A successful response returns a message with the API response as a JSON payload containing all agent fields:
+	    {
+	      "results": [
+	        {
+	          "_id": "123",
+	          "name": "ChatBot",
+	          "description": "A versatile chatbot for customer support",
+	          "summary": "AI-powered chatbot",
+	          "price": 50,
+	          "credits": 10,
+	          "topics": ["chatbot", "support"],
+	          "username": "chatbot123",
+	          "bio": ["AI assistant", "Customer support"],
+	          "prompt": "How can I help you today?",
+	          "elizaId": "eliza456",
+	          "fastId": "fast789",
+	          "worldId": null,
+	          "elizaMetadata": {},
+	          "owner": "user123",
+	          "pricingModel": "subscription",
+	          "agentType": "custom",
+	          "inputExample": "Schedule a meeting",
+	          "outputExample": "Meeting scheduled!",
+	          "walletMetadata": {}
+	        }
+	      ],
+	      "count": 1,
+	      "totalCount": 1
+	    }
 
-A failure response returns a message with the error:
-    Error searching agents: Invalid query parameters`,
-		schema: QueryNLPAgentsSchema,
-	})
-	async searchAgents(args: z.infer<typeof QueryNLPAgentsSchema>): Promise<string> {
-		try {
-			const response = await this.agentService.searchAgentsByNLP(args);
-			return `Successfully found AI agents in the Novix Marketplace:\n${JSON.stringify(response)}`;
-		} catch (error) {
-			return `Error searching agents: ${error}`;
+	A failure response returns a message with the error:
+	    Error searching agents: Invalid query parameters`,
+			schema: QueryNLPAgentsSchema,
+		})
+		async searchAgents(args: z.infer<typeof QueryNLPAgentsSchema>): Promise<string> {
+			try {
+				const response = await this.agentService.searchAgentsByNLP(args);
+				return `Successfully found AI agents in the Novix Marketplace:\n${JSON.stringify(response)}`;
+			} catch (error) {
+				return `Error searching agents: ${error}`;
+			}
 		}
-	}
+
+// 	/**
+// 	 * Search for AI agents in the Novix AI Marketplace.
+// 	 *
+// 	 * @param args - The search query parameters
+// 	 * @returns A formatted string containing relevant agent fields or error message
+// 	 */
+// 	@CreateAction({
+// 		name: "search_agents",
+// 		description: `
+// This tool searches for AI agents in the Novix AI Marketplace using natural language queries and filters.
+
+// A successful response returns a formatted string with relevant agent fields:
+// _id: 6822b221dc7d4d79fdb26990
+// Name: ExecuVibe
+// Summary: Your Cool, Organized Sidekick for Productivity and Inspiration
+// Price: $20
+// Features: Creates and fetches Google Calendar events (ISO format, e.g., 2025-05-15T10:00:00), Takes and organizes notes by category, with a default 'General' option, Offers smart, personalized suggestions to boost productivity or morale
+// ---
+// _id: 681d7e17a7b1b53dac664521
+// Name: SupportAI
+// Summary: Customer support assistant
+// Price: $30
+// Features: Provides real-time chat support, Manages customer tickets
+// ---
+
+// A failure response returns a string with the error:
+// Error searching agents: Invalid query parameters`,
+// 		schema: QueryNLPAgentsSchema,
+// 	})
+// 	async searchAgents(args: z.infer<typeof QueryNLPAgentsSchema>): Promise<string> {
+// 		try {
+// 			console.log(`args`,args)
+// 			const response = await this.agentService.searchAgentsByNLP(args);
+// 			// Format each agent's data into a structured string
+// 			const formattedData = response.results
+// 				.map((agent) => {
+// 					// Handle relevant fields with fallbacks
+// 					const fields = [
+// 						`Name: ${agent.name || "Unknown Agent"}`,
+// 						`Summary: ${agent.summary || "No summary available"}`,
+// 						`Price: $${agent.price ?? 0}`,
+// 						`Features: ${agent.features?.map((f) => f.summary).join(", ") || "None"}`,
+// 					];
+// 					return fields.join("\n") + "\n---";
+// 				})
+// 				.join("\n");
+
+// 			// Return formatted string or fallback for no results
+// 			return formattedData.trim() || "No agents found.";
+// 		} catch (error) {
+// 			return `Error searching agents: ${error instanceof Error ? error.message : "Unknown error"}`;
+// 		}
+// 	}
 
 	/**
 	 * Purchase an AI agent from the Novix AI Marketplace by transferring native tokens.
@@ -146,6 +200,7 @@ A failure response returns a message with the error:
 	})
 	async purchaseAgent(walletProvider: WalletProvider, args: z.infer<typeof PurchaseAgentSchema>): Promise<string> {
 		try {
+			console.log('args1', args)
 			const agent = await this.agentService.getAgentDetails(args.agentId);
 
 			if (!agent) {
@@ -175,14 +230,14 @@ A failure response returns a message with the error:
 
 			const paymentRecord = await this.paymentService.newPayment({ txHash: tx, type: "purchase", amount: price, payer, targetAgent: args.agentId, remarks });
 
-			console.log('args', args)
-			console.log('paymentRecord', paymentRecord)
+			console.log("args", args);
+			console.log("paymentRecord", paymentRecord);
 			// transfer ownership
 			await this.agentService.updateAgentOwnerShip({ agentId: paymentRecord.targetAgent, newOwnerWallet: payer });
 
 			return `Successfully purchased AI agent '${name}' for ${price} USD (~${ethAmount} ETH). Transaction hash: ${tx}`;
 		} catch (err) {
-			console.log('err',err)
+			console.log("err", err);
 			return `Error purchasing agent: ${err.message || err}`;
 		}
 	}

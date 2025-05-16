@@ -1,4 +1,4 @@
-import { Controller, HttpStatus, Post, Res } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Param, Post, Res } from "@nestjs/common";
 import { PaymentsService } from "./payments.service";
 import { AppReply } from "src/types/ApiResponse";
 import { CustomBadRequestException } from "src/exceptions";
@@ -11,6 +11,17 @@ export class PaymentsController {
 	async createCoinbaseCharge(@Res() res: AppReply) {
 		try {
 			const data = await this.paymentsService.createCoinbaseCharge();
+
+			return res.status(HttpStatus.OK).json({ status: "success", data });
+		} catch (err) {
+			throw new CustomBadRequestException();
+		}
+	}
+
+	@Get("get/for-wallet/:wallet")
+	async getPaymentsForUser(@Param("wallet") wallet: string, @Res() res: AppReply) {
+		try {
+			const data = await this.paymentsService.getPaymentsForUser(wallet);
 
 			return res.status(HttpStatus.OK).json({ status: "success", data });
 		} catch (err) {
