@@ -154,10 +154,10 @@ const HomeAppSearch = () => {
 					<input
 						type="text"
 						className="bg-white/5 border border-white/[9%] text-white text-sm rounded-4xl block w-full ps-5 p-3 outline-none shadow-xl"
-						placeholder="Generate AI Agent for ...."
+						placeholder="Say something ...."
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
-						onKeyPress={handleKeyPress}
+						onKeyDown={handleKeyPress}
 						disabled={!sessionId}
 					/>
 					<Button isIconOnly className="rounded-full bg-[#6A53E7]" onClick={handleSendMessage} disabled={!sessionId || !message.trim()}>

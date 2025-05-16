@@ -20,5 +20,7 @@ export interface IAgent {
 	agentType?: "custom" | "eliza";
 	inputExample?: string;
 	outputExample?: string;
-	fastMetadata?: Record<string, any>
+	fastMetadata?: Record<string, any>;
+	tags?: string[];
+	features?: { name: string; summary: string }[];
 }

@@ -2,12 +2,20 @@ import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
 import { Navbar as HeroUINavbar, NavbarBrand, NavbarContent } from "@heroui/navbar";
 import { Img } from "react-image";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { FiHome } from "react-icons/fi";
 import { RiBookmark2Line, RiRobot2Fill } from "react-icons/ri";
 import { TbUser } from "react-icons/tb";
 import OnChainWalletConnect from "@/components/web3/OnChainWalletConnect";
 import ConnectBtn from "@/components/web3/ConnectBtn";
+import { ReactNode, useMemo } from "react";
+import { cn } from "@heroui/theme";
+
+interface BottomTabItemProps {
+	text: string;
+	icon: ReactNode;
+	href?: string;
+}
 
 const HomeAppLayout = () => {
 	return (
@@ -38,7 +46,7 @@ const HomeAppLayout = () => {
 			</div>
 			<div className="absolute text-white bottom-0 w-full bg-white/5 rounded-t-3xl backdrop-blur-sm">
 				<div className="py-4 flex items-center justify-around w-full">
-					<div className="flex flex-col items-center gap-2">
+					{/* <div className="flex flex-col items-center gap-2">
 						<FiHome className="w-6 h-6 text-[#6A53E7]" />
 						<p className="text-xs text-[#6A53E7]">Home</p>
 					</div>
@@ -53,10 +61,35 @@ const HomeAppLayout = () => {
 					<div className="flex flex-col items-center gap-2">
 						<TbUser className="w-6 h-6" />
 						<p className="text-xs">Profile</p>
-					</div>
+					</div> */}
+					<BottomTabItem text="Home" icon={<FiHome className="w-6 h-6 text-[#6A53E7]" />} href="home-app" />
+					<BottomTabItem text="My Agents" icon={<RiRobot2Fill className="w-6 h-6 text-[#6A53E7]" />} href="home-app/my-agents" />
+					<BottomTabItem text="History" icon={<RiBookmark2Line className="w-6 h-6 text-[#6A53E7]" />} href="home-app/history" />
+					<BottomTabItem text="Profile" icon={<TbUser className="w-6 h-6 text-[#6A53E7]" />} href="home-app/profile" />
 				</div>
 			</div>
 		</div>
+	);
+};
+
+const BottomTabItem = ({ text, icon, href }: BottomTabItemProps) => {
+	const location = useLocation();
+
+	const selected = useMemo(() => {
+		if (href && location.pathname !== "/") {
+			return location.pathname === `/${href}` ? true : false;
+		}
+
+		return false;
+	}, [href, location.pathname]);
+
+	return (
+		<Link href={href ? `/${href}` : `/home-app`}>
+			<div className="flex flex-col items-center gap-2">
+				{icon}
+				<p className={cn("text-xs", selected && "text-[#6A53E7]")}>{text}</p>
+			</div>
+		</Link>
 	);
 };
 

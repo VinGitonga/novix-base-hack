@@ -49,7 +49,7 @@ const useWeb3Provider = () => {
 					isAuthenticated: true,
 				}));
 
-				addToast({ title: "Wallet Connected", severity: "success" });
+				addToast({ title: "Wallet Connected", severity: "danger" });
 
 				localStorage.setItem("isAuthenticated", "true");
 

@@ -193,7 +193,7 @@ const UploadAgent = () => {
 	};
 
 	return (
-		<div>
+		<div className="dark">
 			<div className="space-y-2">
 				<h1 className="font-semibold text-lg">Upload & Publish Agent</h1>
 				<p className="text-sm">Input the information below to publish your new AI Agent</p>

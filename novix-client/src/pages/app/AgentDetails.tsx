@@ -87,29 +87,31 @@ const AgentDetails = () => {
 							<span className="text-white">Key Features</span>
 						</div>
 					</div>
-					<h1 className="text-center font-bold text-sm">Smarter Financial Research with AI</h1>
+					<h1 className="text-center font-bold text-sm">{agentInfo?.tags?.[0]}</h1>
 					<p className="text-center text-sm">{agentInfo?.summary}</p>
-					<div className="mx-10">
-						<Carousel className="w-full max-w-md">
-							<CarouselContent>
-								{carouselData.map((item, idx) => (
-									<CarouselItem className="md:basis-1/2 lg:basis-1/3" key={idx}>
-										<div className="bg-white/5 px-8 py-7 shadow-xl rounded-3xl">
-											<div className="">
-												<Img src={item.imgUrl} className="w-full" />
+					{agentInfo?.features && (
+						<div className="mx-10">
+							<Carousel className="w-full max-w-md">
+								<CarouselContent>
+									{agentInfo?.features.map((item, idx) => (
+										<CarouselItem className="md:basis-1/2 lg:basis-1/3" key={idx}>
+											<div className="bg-white/5 px-8 py-7 shadow-xl rounded-3xl">
+												<div className="">
+													<Img src={"/images/agents/insights2.png"} className="w-full" />
+												</div>
+												<div className="mt-5 space-y-4">
+													<h1 className="font-inter font-bold text-center">{item.name}</h1>
+													<p className="text-sm text-center">{item.summary}</p>
+												</div>
 											</div>
-											<div className="mt-5 space-y-4">
-												<h1 className="font-inter font-bold text-center">Real-Time Market Trends</h1>
-												<p className="text-sm text-center">Stay ahead with live updates and predictive analytics.</p>
-											</div>
-										</div>
-									</CarouselItem>
-								))}
-							</CarouselContent>
-							<CarouselPrevious className="dark" />
-							<CarouselNext className="dark" />
-						</Carousel>
-					</div>
+										</CarouselItem>
+									))}
+								</CarouselContent>
+								<CarouselPrevious className="dark" />
+								<CarouselNext className="dark" />
+							</Carousel>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

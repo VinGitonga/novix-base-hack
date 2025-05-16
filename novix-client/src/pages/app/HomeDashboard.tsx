@@ -45,7 +45,7 @@ const HomeDashboard = () => {
 			</div>
 			<div className="mt-5">
 				<div className="grid grid-cols-2 gap-3">
-					<div className="bg-cover bg-center bg-[url(/images/agents/home-bg4.png)] h-48 relative rounded-2xl">
+					{/* <div className="bg-cover bg-center bg-[url(/images/agents/home-bg4.png)] h-48 relative rounded-2xl">
 						<div className="absolute bottom-3 w-full px-5">
 							<div className="flex items-center justify-center w-full bg-white/10 py-1 rounded-full gap-2">
 								<BsStars className="w-5 h-5" />
@@ -68,7 +68,7 @@ const HomeDashboard = () => {
 								<p>Finance Bot</p>
 							</div>
 						</div>
-					</div>
+					</div> */}
 					{/* {[...Array.from({ length: 5 })].map((_, idx) => (
 						<div key={idx} className="bg-cover bg-center bg-[url(/images/agents/home-bg3.png)] h-48 relative rounded-2xl">
 							<div className="absolute bottom-3 w-full px-5">
