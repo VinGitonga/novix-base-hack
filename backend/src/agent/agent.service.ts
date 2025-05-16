@@ -193,8 +193,12 @@ export class AgentService {
 	}
 
 	async updateAgentOwnerShip(body: TrfAgentOwnershipDTO) {
+		console.log("Body", body);
 		const newOwnerData = await this.userService.getAccountByWallet(body.newOwnerWallet);
+		console.log("newOwnerData", newOwnerData);
 
-		await this.agentModel.findByIdAndUpdate(body.agentId, { $set: { owner: newOwnerData._id } });
+		if (newOwnerData) {
+			await this.agentModel.findByIdAndUpdate(body.agentId, { $set: { owner: newOwnerData._id } });
+		}
 	}
 }

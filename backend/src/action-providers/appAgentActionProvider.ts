@@ -175,11 +175,14 @@ A failure response returns a message with the error:
 
 			const paymentRecord = await this.paymentService.newPayment({ txHash: tx, type: "purchase", amount: price, payer, targetAgent: args.agentId, remarks });
 
+			console.log('args', args)
+			console.log('paymentRecord', paymentRecord)
 			// transfer ownership
-			// await this.agentService.updateAgentOwnerShip({ agentId: args.agentId, newOwnerWallet: payer });
+			await this.agentService.updateAgentOwnerShip({ agentId: paymentRecord.targetAgent, newOwnerWallet: payer });
 
 			return `Successfully purchased AI agent '${name}' for ${price} USD (~${ethAmount} ETH). Transaction hash: ${tx}`;
 		} catch (err) {
+			console.log('err',err)
 			return `Error purchasing agent: ${err.message || err}`;
 		}
 	}

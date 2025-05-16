@@ -21,7 +21,10 @@ export class UserService {
 	}
 
 	async getAccountByWallet(wallet: string) {
-		return await this.userModel.findOne({ wallet });
+		const data = await this.userModel.findOne({
+			wallet: { $regex: `^${wallet}$`, $options: "i" },
+		});
+		return data;
 	}
 
 	async getAccountDetailsById(id: string) {
