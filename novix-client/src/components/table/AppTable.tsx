@@ -12,7 +12,7 @@ export interface IAppTableColumn {
 	sortable?: boolean;
 }
 
-type IProps<T extends object & { id?: string }> = {
+type IProps<T extends object & { _id?: string }> = {
 	title: string;
 	data: T[];
 	count: number;
@@ -40,7 +40,7 @@ type IProps<T extends object & { id?: string }> = {
 	hideSearch?: boolean;
 };
 
-const AppTable = <T extends object & { id: string }>({
+const AppTable = <T extends object & { _id: string }>({
 	title,
 	data,
 	count,
@@ -68,7 +68,7 @@ const AppTable = <T extends object & { id: string }>({
 	hideSearch = false,
 }: IProps<T>) => {
 	const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
-		column: "id",
+		column: "_id",
 		direction: "descending",
 	});
 
@@ -145,7 +145,7 @@ const AppTable = <T extends object & { id: string }>({
 									base: "max-w-full sm:max-w-[44%] h-10",
 									mainWrapper: "h-full",
 									input: "text-small",
-									inputWrapper: "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
+									inputWrapper: "h-full font-normal text-default-500 dark",
 								}}
 								placeholder={searchPlaceholder}
 								size="sm"
@@ -207,7 +207,7 @@ const AppTable = <T extends object & { id: string }>({
 				{selectionMode !== "none" && (
 					<span className="w-[30%] text-small text-default-400">{selectedKeys === "all" ? `All items selected (${data?.length})` : `${selectedKeys?.size ?? 0} of ${sortedItems.length} selected`}</span>
 				)}
-				<Pagination isCompact showControls showShadow color="primary" page={currentPage} total={noOfPages} onChange={onCurrentPageChange} />
+				<Pagination isCompact showControls showShadow color="primary" className="dark" page={currentPage} total={noOfPages} onChange={onCurrentPageChange} />
 				<div className="hidden sm:flex w-[30%] justify-end gap-2">
 					<Button isDisabled={noOfPages === 1} size="sm" variant="flat" onPress={onPrevPage} color="primary">
 						Previous
@@ -223,13 +223,13 @@ const AppTable = <T extends object & { id: string }>({
 	return (
 		<>
 			<Table
-				aria-label="SaaStain Table"
+				aria-label="Table"
 				isHeaderSticky
 				isStriped
 				bottomContent={showBottomContent ? bottomContent : undefined}
 				bottomContentPlacement="outside"
 				classNames={{
-					wrapper: "max-h-[90vh]",
+					wrapper: "max-h-[90vh] dark",
 				}}
 				checkboxesProps={{
 					classNames: {
@@ -252,7 +252,7 @@ const AppTable = <T extends object & { id: string }>({
 				</TableHeader>
 				<TableBody emptyContent={emptyContent} items={sortedItems} loadingState={loadingState} loadingContent={<Spinner color="primary" />}>
 					{(item) => (
-						<TableRow key={item.id}>
+						<TableRow key={item._id}>
 							{(columnKey) => (
 								<TableCell>
 									<div className="text-xs">{renderCell(item, columnKey)}</div>

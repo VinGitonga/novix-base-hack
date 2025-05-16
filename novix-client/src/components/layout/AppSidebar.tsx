@@ -24,7 +24,7 @@ const AppSidebar = () => {
 					<AppSidebarItem icon={<TbMessageBolt className="w-5 h-5" />} text={"Upload Agent"} href="agents/upload/custom" />
 					<AppSidebarItem icon={<CgMenuBoxed className="w-5 h-5" />} text={"Build Agent"} href="#" />
 					<Divider />
-					<AppSidebarItem icon={<RiBarChartBoxAiLine className="w-5 h-5" />} text={"Billing"} href="#" />
+					<AppSidebarItem icon={<RiBarChartBoxAiLine className="w-5 h-5" />} text={"Billing"} href="agents/billing" />
 					<AppSidebarItem icon={<IoCog className="w-5 h-5" />} text={"Settings"} href="#" />
 				</div>
 				<p>there</p>

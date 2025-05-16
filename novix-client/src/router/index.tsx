@@ -18,6 +18,7 @@ import MyAgents from "@/pages/app/MyAgents";
 import AgentDetails from "@/pages/app/AgentDetails";
 import AgentPlay from "@/pages/app/AgentPlay";
 import NewAgentPlay from "@/pages/app/NewAgentPlay";
+import BillingAgents from "@/pages/app/BillingAgents";
 
 const router = createBrowserRouter([
 	{
@@ -68,6 +69,7 @@ const router = createBrowserRouter([
 					{ path: "", element: <DashboardScreen /> },
 					{ path: "agents/upload/custom", element: <UploadAgent /> },
 					{ path: "agents/my", element: <MyAgents /> },
+					{ path: "agents/billing", element: <BillingAgents /> },
 				],
 			},
 		],
