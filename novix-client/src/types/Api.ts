@@ -18,6 +18,7 @@ export const enum IApiEndpoint {
 	AGENTS_CREATE_CUSTOM = "agents/custom/create",
 	AGENTS_GET = "agents",
 	AGENTS_GET_DETAILS = "agents/profile/details",
+	AGENTS_GET_BY_OWNER = "agents/get/all/by-owner",
 	PAYMENTS_CREATE_CHARGE = "payments/create-charge",
 	ACCOUNTS_CREATE = "users/create",
 	ACCOUNTS_GET_PROFILE = "users/profile/by-wallet",

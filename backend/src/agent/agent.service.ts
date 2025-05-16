@@ -62,7 +62,7 @@ export class AgentService {
 
 		const agentData = await this.agentModel.aggregate(pipeline);
 
-		return agentData?.[0];
+		return agentData?.[0] as Agent;
 	}
 
 	async getAllAgents() {
@@ -200,5 +200,9 @@ export class AgentService {
 		if (newOwnerData) {
 			await this.agentModel.findByIdAndUpdate(body.agentId, { $set: { owner: newOwnerData._id } });
 		}
+	}
+
+	async getAgentsByOwner(ownerId: string) {
+		return await this.agentModel.find({ owner: new ObjectId(ownerId) });
 	}
 }

@@ -9,6 +9,8 @@ import { Model } from "mongoose";
 import { Credits } from "./entities/credits.entity";
 import { NewPaymentDTO } from "./dto/new-payment.dto";
 import { NewCreditsDTO, UpdateCreditsActions } from "./dto/new-credits.dto";
+import { AgentService } from "src/agent/agent.service";
+import { UserService } from "src/user/user.service";
 
 @Injectable()
 export class PaymentsService {
@@ -17,6 +19,8 @@ export class PaymentsService {
 		private readonly configService: ConfigService,
 		@InjectModel(Payment.name) private readonly paymentModel: Model<Payment>,
 		@InjectModel(Credits.name) private readonly creditsModel: Model<Credits>,
+		private readonly agentService: AgentService,
+		private readonly userService: UserService,
 	) {}
 
 	async createCoinbaseCharge() {
@@ -43,7 +47,9 @@ export class PaymentsService {
 	}
 
 	async newPayment(body: NewPaymentDTO) {
-		const payment = this.paymentModel.create(body);
+		const agent = await this.agentService.getAgentDetails(body.targetAgent);
+		const owner = await this.userService.getAccountDetailsById(String(agent.owner));
+		const payment = this.paymentModel.create({ ...body, targetRecipient: owner.wallet });
 
 		const savedPayment = await (await payment).save();
 
@@ -53,7 +59,7 @@ export class PaymentsService {
 				wallet: body.payer,
 				agent: body.targetAgent,
 				count: body.amount,
-				actionType: "increment"
+				actionType: "increment",
 			};
 
 			await this.updateCreditUsageCredits(dataInfo);

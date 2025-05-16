@@ -5,6 +5,8 @@ import { HttpModule } from "@nestjs/axios";
 import { MongooseModule } from "@nestjs/mongoose";
 import { Payment, PaymentSchema } from "./entities/payment.entity";
 import { Credits, CreditsSchema } from "./entities/credits.entity";
+import { AgentModule } from "src/agent/agent.module";
+import { UserModule } from "src/user/user.module";
 
 @Module({
 	imports: [
@@ -13,6 +15,8 @@ import { Credits, CreditsSchema } from "./entities/credits.entity";
 			{ name: Payment.name, schema: PaymentSchema },
 			{ name: Credits.name, schema: CreditsSchema },
 		]),
+		AgentModule,
+		UserModule
 	],
 	controllers: [PaymentsController],
 	providers: [PaymentsService],

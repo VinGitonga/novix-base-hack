@@ -15,7 +15,7 @@ export class AgentController {
 
 			return res.status(HttpStatus.CREATED).json({ status: "success", data });
 		} catch (err) {
-			console.log('err', err)
+			console.log("err", err);
 			throw new CustomBadRequestException(err.message);
 		}
 	}
@@ -49,7 +49,18 @@ export class AgentController {
 
 			return res.status(200).json({ status: "success", data });
 		} catch (err) {
-			console.log('err', err)
+			console.log("err", err);
+			throw new CustomBadRequestException();
+		}
+	}
+
+	@Get("get/all/by-owner/:ownerId")
+	async getAgentsByOwner(@Param("ownerId") ownerId: string, @Res() res: AppReply) {
+		try {
+			const data = await this.agentService.getAgentsByOwner(ownerId);
+
+			return res.status(HttpStatus.OK).json({ status: "success", data });
+		} catch (err) {
 			throw new CustomBadRequestException();
 		}
 	}

@@ -20,7 +20,13 @@ export class Payment {
 	remarks: string;
 
 	@Prop()
-	txHash: string
+	txHash: string;
+
+	@Prop({ type: String, enum: ["paid", "not-paid", "reversed"], default: "not-paid" })
+	payment_status: string;
+
+	@Prop()
+	targetRecipient: string;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);
