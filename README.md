@@ -8,21 +8,19 @@ The marketplace simplifies AI agent management, offering natural language search
 
 The AI agent ecosystem is fragmented, with no unified platform for discovering specialized agents or deploying them in Web3 contexts.
 
-Novix solves this by providing a decentralized hub on Hedera, easing discovery, deployment, and monetization of AI agents with low-cost.
+Novix solves this by providing a decentralized hub on Base, easing discovery, deployment, and monetization of AI agents with low-cost.
 
 ## Features
 
-- Natural Language Search: Find AI agents by name, summary, or topics (e.g., “fitness AI” retrieves agents like “FitCoach”)
+- Natural Language Search: Find AI agents by name, summary, or topics
 
-- Agent Deployment: Deploy agents with Hedera Agent Kit SDK and topic messaging for Web3 use cases
+- Agent Deployment
 
 - Agent Playground: Test AI Agents with credits before buying an AI agent
 
 - Monetization: Creators can be able to set their agents up for sale or subscription
 
-- Real-Time Updates: Socket.IO powers live agent interactions and marketplace updates, managed by a ConnectionManager for Hedera network connections.
-
-
+- Real-Time Updates: Socket.IO powers live agent interactions and marketplace updates
 ## Screenhots
 [![Screenshot-2025-05-17-at-03-44-59.png](https://i.postimg.cc/QVG09mW4/Screenshot-2025-05-17-at-03-44-59.png)](https://postimg.cc/Fkpjwjp3)
 
@@ -40,6 +38,13 @@ Novix solves this by providing a decentralized hub on Hedera, easing discovery, 
 [![Screenshot-2025-05-17-at-03-58-23.png](https://i.postimg.cc/NG3ckw6V/Screenshot-2025-05-17-at-03-58-23.png)](https://postimg.cc/8sm9T9nB)
 
 [![Screenshot-2025-05-17-at-03-58-37.png](https://i.postimg.cc/YCkBTfyz/Screenshot-2025-05-17-at-03-58-37.png)](https://postimg.cc/N5NnHTtK)
+
+## Team Members 👥
+
+| Name | Role | GitHub |
+|------|------|--------|
+| Hellen Wangeci | UI/UX Designer | [@hellenwangeci](https://github.com/hellenwangeci) |
+| Vincent Gitonga | Lead Developer | [@VinGitonga](https://github.com/VinGitonga) |
 
 ## Transfer Transaction
 https://sepolia.basescan.org/tx/0x93ca488db999ed4aa8f9d11c1fd3faa1e294e45060c130cf68c9b2e9d30cd615
@@ -130,13 +135,12 @@ n``yarn install
 
 - Access the Marketplace: Visit the local instance.
 - Search for Agents: Use natural language queries (e.g., travel AI”) to find agents like “Wanderlust” (25 USD).
-- Deploy Agents: Select an agent, integrate it via Hedera Agent Kit
 - Interact Live: Engage with agents through the chat Playground with Socket.IO.
 
 ## 🚧 Challenges 🚧
 
-- Hedera Integration: Configuring OnchainKit for checkout for AI Agents
-- Real-Time Updates: Ensuring Socket.IO stability with ConnectionManager across multiple Hedera connections was complex
+- Onchainkit Integration: Configuring OnchainKit for checkout for AI Agents
+- Real-Time Updates: Ensuring Socket.IO stability with ConnectionManager across multiple agents connections was complex
 - Search Optimization: Fine-tuning MongoDB text indexing for natural language queries demanded iterative testing.
 
 ## What's Next
