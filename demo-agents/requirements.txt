@@ -1,0 +1,10 @@
+langchain
+langchain-openai
+openai
+langchain-core
+openai-agents
+zep-cloud
+google-auth-oauthlib 
+google-api-python-client
+requests
+python-dotenv
