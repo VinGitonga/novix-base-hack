@@ -10,6 +10,7 @@ import { useParams } from "react-router";
 import useSWR from "swr";
 import { Checkout, CheckoutButton, CheckoutStatus, LifecycleStatus } from "@coinbase/onchainkit/checkout";
 import { API_URL } from "@/env";
+import { useAuthStore } from "@/hooks/store/useAuthStore";
 
 const carouselData = [
 	{
@@ -25,6 +26,7 @@ const carouselData = [
 
 const AgentDetails = () => {
 	const params = useParams();
+	const { account } = useAuthStore();
 
 	const { data: agentInfo } = useSWR<IAgent>(!params.id ? undefined : [`${IApiEndpoint.AGENTS_GET_DETAILS}/${params.id}`], swrFetcher, { keepPreviousData: true });
 
@@ -68,14 +70,18 @@ const AgentDetails = () => {
 					<h1 className="text-center font-bold text-lg">Shop & Test AI Agents in One Place</h1>
 					<p className="text-center">Discover, try, and buy powerful AI agents built to solve real problems.</p>
 					<div className="flex items-center justify-center gap-5">
-						<Button className="rounded-4xl bg-linear-65 from-[#ffffff] from-5% to-[#0A0248] to-95%">Buy the Agent</Button>
-						{/* <Checkout productId="200a4bdd-bfe1-44c4-9730-5d394b5f51f1" chargeHandler={chargeHandler} onStatus={statusHandler}>
-							<CheckoutButton />
-							<CheckoutStatus />
-						</Checkout> */}
-						<Link href={`/home-app/new-agent-play/${params.id}`} className="text-white underline underline-offset-4">
-							Free Trial
-						</Link>
+						{agentInfo && agentInfo?.owner !== account?._id ? (
+							<>
+								<Button className="rounded-4xl bg-linear-65 from-[#ffffff] from-5% to-[#0A0248] to-95%">Buy the Agent</Button>
+								<Link href={`/home-app/new-agent-play/${params.id}`} className="text-white underline underline-offset-4">
+									Free Trial
+								</Link>
+							</>
+						) : (
+							<Button as={Link} href={`/home-app/new-agent-play/${params.id}`} className="rounded-4xl bg-linear-65 from-[#ffffff] from-5% to-[#0A0248] to-95%">
+								Run
+							</Button>
+						)}
 					</div>
 				</div>
 			</div>
